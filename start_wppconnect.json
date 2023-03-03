@@ -1,0 +1,399 @@
+{
+  "name": "start wppconnect",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "dac9ba52-c26f-4b0c-b0fa-58377b195dc4",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        460,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "CHAVE_DO_CANAL",
+              "value": "={{$json[\"chanel\"][\"name\"]}}"
+            },
+            {
+              "name": "INDEX_ID",
+              "value": "={{$json[\"body\"][\"messages\"][0][\"inbox_id\"]}}"
+            },
+            {
+              "name": "ACCOUNT_ID",
+              "value": "={{$json[\"body\"][\"messages\"][0][\"account_id\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Variáveis",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        1020
+      ],
+      "id": "0aef19c9-b6c8-4be4-838b-a058681c99e4"
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "={{$node[\"Globais\"].parameter[\"values\"][\"string\"][2][\"value\"]}}/api/{{$node[\"Variáveis\"].json[\"CHAVE_DO_CANAL\"]}}/{{$node[\"Globais\"].json[\"WPPCONNECT_KEY\"]}}/generate-token",
+        "options": {}
+      },
+      "name": "Criar canal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        1620,
+        1020
+      ],
+      "id": "6bea9eae-e640-4846-8148-2fab28fa7317"
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "={{$node[\"Globais\"].parameter[\"values\"][\"string\"][2][\"value\"]}}/api/{{$node[\"Variáveis\"].json[\"CHAVE_DO_CANAL\"]}}/start-session",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ { \"webhook\": null, \"waitQrCore\": true, \"chatWoot\": {\"enable\": true, \"baseURL\": \"http://chatwoot:3000\", \"token\": $node[\"Globais\"].json[\"CHATWOOT_TOKEN\"], \"inbox_id\": $node[\"Variáveis\"].json[\"INDEX_ID\"], \"account_id\": $node[\"Variáveis\"].json[\"ACCOUNT_ID\"] } } }}",
+        "headerParametersJson": "={{ {\"Authorization\": \"Bearer \" + $json[\"token\"]} }}"
+      },
+      "name": "Iniciar canal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        1020
+      ],
+      "id": "be270076-3908-469d-9768-961bbe6001f0"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatwoot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        120,
+        1180
+      ],
+      "webhookId": "6adb186a-be0a-4ae7-b00d-808e8bfb8b8e",
+      "id": "96fc6a68-2c9a-46f6-8d62-dc8e1e48181f"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"body\"][\"messages\"][0][\"content\"]}}",
+              "operation": "startsWith",
+              "value2": "/start"
+            },
+            {
+              "value1": "={{$json[\"body\"][\"meta\"][\"sender\"][\"phone_number\"]}}",
+              "value2": "+5511999999999"
+            }
+          ]
+        }
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        520,
+        1180
+      ],
+      "id": "ad5f81bb-8f68-4348-b620-922f5f9be3ed"
+    },
+    {
+      "parameters": {},
+      "name": "NoOp1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        1440
+      ],
+      "id": "b4b4a2ac-4487-47c8-bb68-c13f89f05826"
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "chanel.name",
+              "value": "={{$json[\"body\"][\"messages\"][0][\"content\"].split(' ')[1]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Extrai o nome do canal",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        920
+      ],
+      "id": "3a51eb4d-ee35-48ca-b16d-f7fed675e74f"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "BASE_URL_CHATWOOT",
+              "value": "http://chatwoot:3000"
+            },
+            {
+              "name": "CHATWOOT_TOKEN",
+              "value": "CHATWOOT_TOKEN"
+            },
+            {
+              "name": "BASE_URL_WPPCONNECT",
+              "value": "http://wppconnect-server:21465"
+            },
+            {
+              "name": "WPPCONNECT_KEY",
+              "value": "WPPCONNECT_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Globais",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        320,
+        1180
+      ],
+      "id": "8d5096e1-9889-482b-94f4-6cbeca4c1cab"
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "={{$node[\"Globais\"].parameter[\"values\"][\"string\"][0][\"value\"]}}/api/v1/accounts/{{$node[\"Webhook\"].json[\"body\"][\"messages\"][0][\"account_id\"]}}/conversations/{{$node[\"Webhook\"].json[\"body\"][\"messages\"][0][\"conversation_id\"]}}/messages",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ {\"content\":\"**ERRO**: Comando mal formado, exp: \\n\\n `/start nome-do-canal`\", \"message_type\": \"incoming\", \"private\": true } }}",
+        "headerParametersJson": "={{ {\"api_access_token\": $node[\"Globais\"].json[\"CHATWOOT_TOKEN\"] } }}"
+      },
+      "name": "ERRO Falta de chave do Canal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        820
+      ],
+      "id": "148b6c53-3641-4947-9a27-741825f99d60"
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "={{$node[\"Globais\"].parameter[\"values\"][\"string\"][0][\"value\"]}}/api/v1/accounts/{{$node[\"Webhook\"].json[\"body\"][\"messages\"][0][\"account_id\"]}}/conversations/{{$node[\"Webhook\"].json[\"body\"][\"messages\"][0][\"conversation_id\"]}}/messages",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ {\"content\":\"Concluído: senário n8n\", \"message_type\": \"incoming\", \"private\": true } }}",
+        "headerParametersJson": "={{ {\"api_access_token\": $node[\"Globais\"].json[\"CHATWOOT_TOKEN\"] } }}"
+      },
+      "name": "MSG de Conclusão",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        2040,
+        1020
+      ],
+      "id": "00380eb1-c2ca-4b2a-9cff-26709a08b457"
+    },
+    {
+      "parameters": {
+        "content": "## Comando de abertura do canal",
+        "height": 440,
+        "width": 1320
+      },
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        960,
+        760
+      ],
+      "id": "dbeafc79-c2e3-429e-8c2c-ede387f2a123"
+    },
+    {
+      "parameters": {
+        "content": "## Comando não implementado",
+        "height": 220,
+        "width": 380
+      },
+      "name": "Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        960,
+        1380
+      ],
+      "id": "cad60302-d89d-4b1c-b21c-a65df92ba1dc"
+    },
+    {
+      "parameters": {
+        "content": "## Captura do comando",
+        "height": 220,
+        "width": 600
+      },
+      "name": "Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        80,
+        1120
+      ],
+      "id": "e64c8095-1b9a-4251-82bd-b40a6ba0e866"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Extrai o nome do canal\"].json[\"chanel\"][\"name\"]}}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "name": "Se o nome do canal não existir",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        920
+      ],
+      "id": "7807c208-784b-4042-b1c5-f235c0ab59fe"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Variáveis": {
+      "main": [
+        [
+          {
+            "node": "Criar canal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar canal": {
+      "main": [
+        [
+          {
+            "node": "Iniciar canal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iniciar canal": {
+      "main": [
+        [
+          {
+            "node": "MSG de Conclusão",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Globais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Extrai o nome do canal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NoOp1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrai o nome do canal": {
+      "main": [
+        [
+          {
+            "node": "Se o nome do canal não existir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Globais": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se o nome do canal não existir": {
+      "main": [
+        [
+          {
+            "node": "ERRO Falta de chave do Canal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Variáveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "81b63308-c8fd-4941-a176-f9998d9694e1",
+  "id": "4",
+  "meta": {
+    "instanceId": "45d3a3b4726a0b03466f0b804b92570fc3d081daf75530d206de8eb00572510c"
+  },
+  "tags": []
+}
