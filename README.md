@@ -41,4 +41,22 @@ http://bridge:3000/chatwoot/webhook?botpress_bot_id=bot&chatwoot_bot_token=token
 Coloque o token do seu bot aqui  - CHATWOOT_BOT_TOKEN=TOKEN-BOT-CHATWOOT
 se for criar um bot com id diferente de 'bot' faça a alteração aqui - BOTPRESS_BOT_ID=bot *obs esse bot é criado no botpress
 -------------------
+no chatwoot crie uma caixa de entrada do tipo api
+coloque o nome preferido e coloque esse link aqui como api http://wppconnect-server:21465/api/minhasala/chatwoot
+nesse mesma caixa adicione o bot criado no chatwoot.
+adicione um contato com o numero +5511999999999 esse contato vai ser responsavel para dar o start no wppc
+----------------------------------
+acesse o n8n importe o flow que está nesse git, altere o token do usuario do chatwoot e token do wppc.
+vá no contato criado e de um /start minhasala
+agora é só esperar que vai aparecer o qrcode.
 
+para mais informações segue os links de fontes utilizadas.
+link referente ao integrador do bot
+https://www.linkedin.com/pulse/subindo-um-ambiente-de-desenvolvimento-chatbot-poderoso-douglas-lara/
+link referente a os videos de instalação e configuração o chatwoot+n8n+wppconnect
+https://www.youtube.com/watch?v=A4QsJvJMWIA&list=WL
+https://www.youtube.com/watch?v=00616mTid-M
+--------------------------------------------
+Deu muito trabalho consegui todas essas informações, assim que tiver um tempo coloco melhoro essa cocumentação
+
+se quiser me ajudar com pix minha chave é edcarlos@kabaweb.in
