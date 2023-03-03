@@ -1,0 +1,115 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:14
+    restart: always
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres:/data/postgres
+    environment:
+      - POSTGRES_DB=chatwoot
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+
+  redis:
+    image: redis:alpine
+    restart: always
+    command: ["sh", "-c", "redis-server --requirepass \"password\""]
+    volumes:
+      - redis:/data/redis
+    ports:
+      - '6379:6379'
+
+  botpress:
+    image: botpress/server
+    ports:
+      - '3001:3000'
+
+  chatwoot:
+    image: chatwoot/chatwoot:latest
+    environment:
+      - RAILS_ENV=production
+      - RAILS_LOG_TO_STDOUT=true
+      - SECRET_KEY_BASE=Testing1234
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DATABASE=chatwoot
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=password
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=password
+      - FRONTEND_URL=https://chatwoot.dominio.com.br
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+      - redis
+    command: sh -c "bundle exec rails db:chatwoot_prepare; bundle exec rails s -b 0.0.0.0 -p 3000"
+
+
+  chatwoot-sidekiq:
+    image: chatwoot/chatwoot:latest
+    environment:
+      - RAILS_ENV=production
+      - RAILS_LOG_TO_STDOUT=true
+      - SECRET_KEY_BASE=Testing1234
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DATABASE=chatwoot
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=password
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=password
+    depends_on:
+      - postgres
+      - redis
+      - chatwoot
+    command: sh -c "bundle exec sidekiq -C config/sidekiq.yml"
+
+  bridge:
+    image: douglara/chatwoot-botpress-bridge:1
+    environment:
+      - RAILS_ENV=production
+      - RAILS_LOG_TO_STDOUT=true
+      - SECRET_KEY_BASE=Testing1234
+      - BOTPRESS_ENDPOINT=http://botpress:3000
+      - BOTPRESS_BOT_ID=bot
+      - CHATWOOT_ENDPOINT=http://chatwoot:3000
+      - CHATWOOT_BOT_TOKEN=TOKEN-BOT-CHATWOOT
+    ports:
+      - '3002:3000'
+
+  n8n:
+    image: n8nio/n8n    
+    volumes:
+      - ./n8n:/home/node/.n8n 
+    hostname: n8n
+    command: n8n start --tunnel  
+    ports:
+      - '5678:5678'
+    depends_on:
+      - postgres
+      - redis
+      - chatwoot
+      - wppconnect-server
+
+
+  wppconnect-server:
+    build: 
+      dockerfile: Dockerfile
+    restart: always
+    image: wppconnect-server
+    container_name: wppconnect-server
+    hostname: wppconnect-server
+    entrypoint: docker-entrypoint.sh yarn start
+    ports:
+      - '21465:21465'
+    depends_on:
+      - postgres
+      - redis
+      - chatwoot
+ 
+volumes:
+  postgres:
+  redis:
+
